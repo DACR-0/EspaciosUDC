@@ -1,6 +1,6 @@
-// src/app/api/auth/[...nextauth]/route.js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { pool } from "../../../utils/db";
 
 export const authOptions = {
   providers: [
@@ -11,20 +11,22 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("CREDENTIALS:", credentials); // 👈 Añade esto para verificar
+        const [rows] = await pool.query(
+          "SELECT * FROM user WHERE email = ? AND pass = ?",
+          [credentials.email, credentials.password]
+        );
 
-        if (
-          credentials?.email === "user@example.com" &&
-          credentials?.password === "password"
-        ) {
+        if (rows.length > 0) {
+          const user = rows[0];
           return {
-            id: "1",
-            name: "Usuario Ejemplo",
-            email: credentials.email,
+            id: user.iduser,
+            name: user.email,
+            email: user.email,
+            rol: user.rol,
           };
         }
 
-        return null; // ❌ Si no pasa la validación
+        return null;
       },
     }),
   ],
@@ -34,5 +36,6 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+// Exporta los métodos HTTP requeridos por Next.js App Router
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

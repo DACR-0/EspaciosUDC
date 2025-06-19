@@ -25,7 +25,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{
+          background: "#f9f9f9",
+          minHeight: "100vh",
+        }}
+      >
         <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>

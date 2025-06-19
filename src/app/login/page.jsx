@@ -3,6 +3,21 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  Avatar,
+  InputAdornment,
+  Alert,
+  IconButton,
+} from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -27,41 +42,142 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-full max-w-sm text-black">
-        <h2 className="text-2xl font-bold text-center mb-6">Iniciar sesión</h2>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "linear-gradient(135deg, #e3f0ff 0%, #f8fbff 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+      }}
+    >
+      {/* Botón volver arriba a la izquierda */}
+      <IconButton
+        onClick={() => router.push("/")}
+        sx={{
+          position: "absolute",
+          top: 32,
+          left: 32,
+          bgcolor: "white",
+          boxShadow: 2,
+          "&:hover": { bgcolor: "#e3f2fd" },
+        }}
+        aria-label="Volver"
+      >
+        <ArrowBackIosNewIcon color="primary" />
+      </IconButton>
 
-        <div className="mb-4">
-          <label className="block mb-1">Email</label>
-          <input
+      <Paper
+        elevation={10}
+        sx={{
+          p: 5,
+          borderRadius: 5,
+          minWidth: 350,
+          maxWidth: 400,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          boxShadow: "0 12px 40px 0 rgba(31, 38, 135, 0.18)",
+          backdropFilter: "blur(2px)",
+        }}
+      >
+        <Avatar
+          sx={{
+            bgcolor: "primary.main",
+            mb: 2,
+            width: 64,
+            height: 64,
+            boxShadow: 3,
+          }}
+        >
+          <LockOutlinedIcon fontSize="large" />
+        </Avatar>
+        <Typography
+          variant="h4"
+          component="h1"
+          color="primary"
+          fontWeight={700}
+          gutterBottom
+          sx={{ letterSpacing: 1 }}
+        >
+          Iniciar sesión
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          mb={3}
+          sx={{ textAlign: "center" }}
+        >
+          Ingresa tus credenciales para acceder al sistema
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+          <TextField
+            label="Correo institucional"
             type="email"
-            className="w-full border border-gray-300 p-2 rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+            margin="normal"
             required
+            autoFocus
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <EmailOutlinedIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-1">Contraseña</label>
-          <input
+          <TextField
+            label="Contraseña"
             type="password"
-            className="w-full border border-gray-300 p-2 rounded"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            fullWidth
+            margin="normal"
             required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <VpnKeyOutlinedIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          {error && (
+            <Alert severity="error" sx={{ mt: 2, mb: 1, fontWeight: 500 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+            sx={{
+              mt: 2,
+              borderRadius: 2,
+              fontWeight: 700,
+              boxShadow: 3,
+              py: 1.3,
+              letterSpacing: 1,
+              fontSize: "1.1rem",
+            }}
+          >
+            Entrar
+          </Button>
+        </Box>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 4, textAlign: "center" }}
         >
-          Entrar
-        </button>
-      </form>
-    </div>
+          © {new Date().getFullYear()} Universidad de Cartagena. Todos los derechos reservados.
+        </Typography>
+      </Paper>
+    </Box>
   );
 }
