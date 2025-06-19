@@ -1,20 +1,104 @@
-import { TextField, Button, Box } from "@mui/material";
+import { Button, Box, Typography } from "@mui/material";
 import { useState } from "react";
+import PreguntaTextoCorto from "./preguntas/PreguntaTextoCorto";
+import PreguntaDesplegable from "./preguntas/PreguntaDesplegable";
+import PreguntaTelefono from "./preguntas/PreguntaTelefono";
 
-export default function DatosPersonalesAlquiler({ onSubmit, enviando, onBack }: { onSubmit: (data: any) => void, enviando: boolean, onBack: () => void }) {
+const opcionesDocumento = [
+  { value: "CC", label: "Cédula de ciudadanía" },
+  { value: "TI", label: "Tarjeta de identidad" },
+  { value: "CE", label: "Cédula de extranjería" },
+  { value: "PS", label: "Pasaporte" },
+  // Puedes agregar más tipos si lo necesitas
+];
+
+export default function DatosPersonalesAlquiler({
+  onSubmit,
+  enviando,
+  onBack,
+}: {
+  onSubmit: (data: any) => void;
+  enviando: boolean;
+  onBack: () => void;
+}) {
   const [nombre, setNombre] = useState("");
+  const [tipoDocumento, setTipoDocumento] = useState("");
   const [identificacion, setIdentificacion] = useState("");
   const [organizacion, setOrganizacion] = useState("");
   const [cargo, setCargo] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [correo, setCorreo] = useState("");
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit({ nombre, identificacion, organizacion, cargo, correo }); }}>
-      <TextField label="Nombre completo" fullWidth margin="normal" required value={nombre} onChange={e => setNombre(e.target.value)} />
-      <TextField label="Identificación" fullWidth margin="normal" required value={identificacion} onChange={e => setIdentificacion(e.target.value)} />
-      <TextField label="Organización/Universidad" fullWidth margin="normal" required value={organizacion} onChange={e => setOrganizacion(e.target.value)} />
-      <TextField label="Cargo" fullWidth margin="normal" required value={cargo} onChange={e => setCargo(e.target.value)} />
-      <TextField label="Correo electrónico" type="email" fullWidth margin="normal" required value={correo} onChange={e => setCorreo(e.target.value)} />
+    <form
+      onSubmit={e => {
+        e.preventDefault();
+        onSubmit({
+          nombre,
+          tipoDocumento,
+          identificacion,
+          organizacion,
+          cargo,
+          telefono,
+          correo,
+        });
+      }}
+    >
+      <Typography variant="h6" fontWeight={700} mb={2}>
+        Información del solicitante
+      </Typography>
+
+      <PreguntaTextoCorto
+        label="Nombre completo del solicitante"
+        value={nombre}
+        onChange={setNombre}
+        required
+      />
+
+      <PreguntaDesplegable
+        label="Tipo de documento"
+        value={tipoDocumento}
+        onChange={setTipoDocumento}
+        options={opcionesDocumento}
+        required
+      />
+
+      <PreguntaTextoCorto
+        label="Número de documento"
+        value={identificacion}
+        onChange={setIdentificacion}
+        required
+      />
+
+      <PreguntaTextoCorto
+        label="Nombre de la entidad a la que pertenece"
+        value={organizacion}
+        onChange={setOrganizacion}
+        required
+      />
+
+      <PreguntaTextoCorto
+        label="Cargo dentro de la entidad"
+        value={cargo}
+        onChange={setCargo}
+        required
+      />
+
+      <PreguntaTelefono
+        label="Teléfono"
+        value={telefono}
+        onChange={setTelefono}
+        required
+      />
+
+      <PreguntaTextoCorto
+        label="Correo electrónico"
+        value={correo}
+        onChange={setCorreo}
+        type="email"
+        required
+      />
+
       <Box mt={3} display="flex" justifyContent="center" gap={2}>
         <Button
           variant="outlined"

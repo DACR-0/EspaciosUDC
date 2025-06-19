@@ -1,5 +1,5 @@
 // components/preguntas/PreguntaSiNoArchivo.tsx
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button } from "@mui/material";
+import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, Typography, Box } from "@mui/material";
 
 interface PreguntaSiNoArchivoProps {
   label: string;
@@ -24,10 +24,21 @@ export default function PreguntaSiNoArchivo({
         <FormControlLabel value="no" control={<Radio />} label="No" />
       </RadioGroup>
       {value === "si" && (
-        <Button variant="outlined" component="label" sx={{ mt: 1 }}>
-          Subir archivo
-          <input type="file" hidden onChange={onFileChange} />
-        </Button>
+        <Box mt={1} display="flex" alignItems="center" gap={2}>
+          <Button
+            variant={file ? "contained" : "outlined"}
+            color={file ? "success" : "primary"}
+            component="label"
+          >
+            {file ? "Archivo seleccionado" : "Subir archivo"}
+            <input type="file" hidden onChange={onFileChange} />
+          </Button>
+          {file && (
+            <Typography variant="body2" color="success.main">
+              {file.name}
+            </Typography>
+          )}
+        </Box>
       )}
     </FormControl>
   );

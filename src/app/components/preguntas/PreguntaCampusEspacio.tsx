@@ -1,5 +1,5 @@
 // components/preguntas/PreguntaCampusEspacio.tsx
-import { Typography, Box } from "@mui/material";
+import { Typography,FormLabel, Box } from "@mui/material";
 
 interface CampusImage {
   value: string;
@@ -22,7 +22,7 @@ export default function PreguntaCampusEspacio({
 }: PreguntaCampusEspacioProps) {
   return (
     <Box marginY={2}>
-      <Typography variant="subtitle1" gutterBottom>{label}</Typography>
+      <FormLabel>{label}</FormLabel>
       <Box display="flex" gap={2} overflow="auto">
         {images.map((img: CampusImage, idx: number) => (
           <Box

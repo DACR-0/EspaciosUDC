@@ -86,7 +86,7 @@ export default function SurveyForm() {
     <Paper
       elevation={10}
       sx={{
-        maxWidth: 480,
+        maxWidth: 720,
         mx: "auto",
         p: { xs: 2, sm: 4 },
         mt: 4,
@@ -149,8 +149,7 @@ export default function SurveyForm() {
           {tipo === "alquiler" && (
             <AlquilerSurvey
               form={form}
-              onInputChange={handleChangeInput}
-              onSelectChange={handleChangeSelect}
+              onChange={(field, value) => setForm(prev => ({ ...prev, [field]: value }))}
             />
           )}
 
@@ -178,10 +177,10 @@ export default function SurveyForm() {
 
       {/* Paso 2: Datos personales */}
       {paso === 2 && (
-  tipo === "alquiler"
-    ? <DatosPersonalesAlquiler onSubmit={handleDatosPersonales} enviando={enviando} onBack={() => setPaso(1)} />
-    : <DatosPersonalesPrestamo onSubmit={handleDatosPersonales} enviando={enviando} onBack={() => setPaso(1)} />
-)}
+        tipo === "alquiler"
+          ? <DatosPersonalesAlquiler onSubmit={handleDatosPersonales} enviando={enviando} onBack={() => setPaso(1)} />
+          : <DatosPersonalesPrestamo onSubmit={handleDatosPersonales} enviando={enviando} onBack={() => setPaso(1)} />
+      )}
 
       {/* Paso 3: Mensaje final */}
       {paso === 3 && (
