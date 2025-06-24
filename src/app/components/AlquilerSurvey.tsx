@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PreguntaAbierta from "./preguntas/PreguntaAbierta";
 import PreguntaOpcionMultiple from "./preguntas/PreguntaOpcionMultiple";
 import PreguntaOpcionUnica from "./preguntas/PreguntaOpcionUnica";
@@ -27,32 +27,55 @@ const asistentesOpciones = [
   { value: "mas_250", label: "Más de 250" },
 ];
 
-// Ejemplo de imágenes de campus y espacios
-const campusImages = [
-  { value: "campus1", src: "/campus1.jpg", label: "Campus Centro" },
-  { value: "campus2", src: "/campus2.jpg", label: "Campus Norte" },
-];
-
-const espaciosPorCampus: Record<string, { value: string; src: string; label: string }[]> = {
-  campus1: [
-    { value: "auditorio", src: "/auditorio.jpg", label: "Auditorio" },
-    { value: "sala_reuniones", src: "/sala.jpg", label: "Sala de reuniones" },
-  ],
-  campus2: [
-    { value: "cancha", src: "/cancha.jpg", label: "Cancha múltiple" },
-    { value: "biblioteca", src: "/biblioteca.jpg", label: "Biblioteca" },
-  ],
-};
-
 export default function AlquilerSurvey({ form, onChange }: {
   form: any;
   onChange: (field: string, value: any) => void;
 }) {
-  // Para archivo PDF
   const [convenioFile, setConvenioFile] = useState<File | null>(null);
 
-  // Espacios según campus seleccionado
-  const espaciosDisponibles = form.campus ? espaciosPorCampus[form.campus] || [] : [];
+  // Campus y espacios desde la base de datos
+  const [campusList, setCampusList] = useState<{ value: string, src: string, label: string }[]>([]);
+  const [espaciosList, setEspaciosList] = useState<{ value: string, src: string, label: string }[]>([]);
+  const [loadingCampus, setLoadingCampus] = useState(false);
+  const [loadingEspacios, setLoadingEspacios] = useState(false);
+
+  // Cargar campus al montar
+  useEffect(() => {
+    setLoadingCampus(true);
+    fetch("/api/campus")
+      .then(res => res.json())
+      .then(data => {
+        setCampusList(
+          data.map((c: any) => ({
+            value: c.idcampus.toString(),
+            src: c.imagen || "/campus-default.jpg",
+            label: c.nombre,
+          }))
+        );
+      })
+      .finally(() => setLoadingCampus(false));
+  }, []);
+
+  // Cargar espacios cuando se selecciona un campus
+  useEffect(() => {
+    if (form.campus) {
+      setLoadingEspacios(true);
+      fetch(`/api/espacios?campus_id=${form.campus}`)
+        .then(res => res.json())
+        .then(data => {
+          setEspaciosList(
+            data.map((e: any) => ({
+              value: e.idespacio.toString(),
+              src: e.imagen || "/espacio-default.jpg",
+              label: e.nombre,
+            }))
+          );
+        })
+        .finally(() => setLoadingEspacios(false));
+    } else {
+      setEspaciosList([]);
+    }
+  }, [form.campus]);
 
   return (
     <>
@@ -92,16 +115,18 @@ export default function AlquilerSurvey({ form, onChange }: {
 
       <PreguntaCampusEspacio
         label="5. Seleccione el campus"
-        images={campusImages}
+        images={campusList}
         value={form.campus || ""}
         onChange={val => onChange("campus", val)}
+        loading={loadingCampus}
       />
 
       <PreguntaCampusEspacio
         label="6. Seleccione el espacio"
-        images={espaciosDisponibles}
+        images={espaciosList}
         value={form.espacio || ""}
         onChange={val => onChange("espacio", val)}
+        loading={loadingEspacios}
       />
 
       <PreguntaFechaHora

@@ -47,23 +47,47 @@ export default function useCampus() {
 
   // Agregar espacio a un campus
   const addEspacio = async (campusId, espacio) => {
-  if (!campusId) {
-    alert("No se ha seleccionado un campus.");
-    return;
-  }
-  const res = await fetch("/api/espacios", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...espacio, campus_id: campusId }),
-  });
-  const creado = await res.json();
-  setCampus(prev =>
-    prev.map(c =>
-      c.idcampus === campusId
-        ? { ...c, espacios: [...(c.espacios || []), creado] }
-        : c
-    )
-  );
-};
-  return { campus, loading, addCampus, editCampus, deleteCampus, addEspacio };
+    if (!campusId) {
+      alert("No se ha seleccionado un campus.");
+      return;
+    }
+    // Asegúrate de que capacidad sea un número o null
+    const capacidad = espacio.aforo ? parseInt(espacio.aforo, 10) : null;
+    const res = await fetch("/api/espacios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nombre: espacio.nombre,
+        imagen: espacio.imagen,
+        capacidad,
+        campus_id: campusId,
+      }),
+    });
+    const creado = await res.json();
+    setCampus(prev =>
+      prev.map(c =>
+        c.idcampus === campusId
+          ? { ...c, espacios: [...(c.espacios || []), creado] }
+          : c
+      )
+    );
+  };
+
+  // Eliminar espacio
+  const deleteEspacio = async (espacioId) => {
+    await fetch("/api/espacios", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: espacioId }),
+    });
+    // Opcional: actualizar el estado local si lo necesitas
+    setCampus(prev =>
+      prev.map(c => ({
+        ...c,
+        espacios: (c.espacios || []).filter(e => e.idespacio !== espacioId)
+      }))
+    );
+  };
+
+  return { campus, loading, addCampus, editCampus, deleteCampus, addEspacio, deleteEspacio };
 }

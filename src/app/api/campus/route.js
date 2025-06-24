@@ -1,8 +1,8 @@
 import { pool } from "@/app/utils/db";
 
-// GET: listar todos los campus
+// GET: listar todos los campus activos
 export async function GET() {
-  const [rows] = await pool.query("SELECT * FROM campus");
+  const [rows] = await pool.query("SELECT * FROM campus WHERE eliminado_en IS NULL");
   return Response.json(rows);
 }
 
@@ -26,9 +26,12 @@ export async function PUT(request) {
   return Response.json({ id, nombre, imagen });
 }
 
-// DELETE: eliminar un campus
+// DELETE: borrado lógico de un campus
 export async function DELETE(request) {
   const { id } = await request.json();
-  await pool.query("DELETE FROM campus WHERE idcampus = ?", [id]);
+  await pool.query(
+    "UPDATE campus SET eliminado_en = NOW() WHERE idcampus = ?",
+    [id]
+  );
   return Response.json({ success: true });
 }

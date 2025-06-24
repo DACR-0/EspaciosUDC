@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CampusList from "./campus/CampusList";
@@ -9,12 +9,35 @@ import EspacioFormModal from "./espacios/EspacioFormModal";
 import useCampus from "./hooks/useCampus";
 
 export default function GestionCampusEspacios() {
-  const { campus, addCampus, addEspacio } = useCampus();
+  const { campus, addCampus, addEspacio, deleteEspacio, deleteCampus } = useCampus();
   const [modalCampus, setModalCampus] = useState(false);
   const [modalEspacio, setModalEspacio] = useState(false);
   const [formCampus, setFormCampus] = useState({ nombre: "", imagen: "" });
   const [formEspacio, setFormEspacio] = useState({ nombre: "", imagen: "", aforo: "" });
   const [campusSeleccionado, setCampusSeleccionado] = useState(null);
+  const [espacios, setEspacios] = useState([]);
+  const [loadingEspacios, setLoadingEspacios] = useState(false);
+
+  // Cargar espacios al seleccionar un campus
+  useEffect(() => {
+    if (campusSeleccionado) {
+      setLoadingEspacios(true);
+      fetch(`/api/espacios?campus_id=${campusSeleccionado.idcampus}`)
+        .then(res => res.json())
+        .then(data => setEspacios(data))
+        .finally(() => setLoadingEspacios(false));
+    }
+  }, [campusSeleccionado]);
+
+  // Eliminar espacio y recargar lista
+  const handleDeleteEspacio = async (espacioId) => {
+    setLoadingEspacios(true);
+    await deleteEspacio(espacioId);
+    fetch(`/api/espacios?campus_id=${campusSeleccionado.idcampus}`)
+      .then(res => res.json())
+      .then(data => setEspacios(data))
+      .finally(() => setLoadingEspacios(false));
+  };
 
   // Vista principal: lista de campus
   if (!campusSeleccionado) {
@@ -33,7 +56,11 @@ export default function GestionCampusEspacios() {
             Crear campus
           </Button>
         </Box>
-        <CampusList campusList={campus} onSelectCampus={setCampusSeleccionado} />
+        <CampusList
+          campusList={campus}
+          onSelectCampus={setCampusSeleccionado}
+          onDeleteCampus={deleteCampus} // <-- Aquí pasas la función de eliminar campus
+        />
         <CampusFormModal
           open={modalCampus}
           onClose={() => setModalCampus(false)}
@@ -69,12 +96,24 @@ export default function GestionCampusEspacios() {
           Agregar espacio
         </Button>
       </Box>
-      <EspaciosList espacios={campusSeleccionado.espacios} />
+      {loadingEspacios ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight={200}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <EspaciosList espacios={espacios} onDelete={handleDeleteEspacio} />
+      )}
       <EspacioFormModal
         open={modalEspacio}
         onClose={() => setModalEspacio(false)}
-        onSubmit={() => {
-          addEspacio(campusSeleccionado.idcampus, formEspacio);
+        onSubmit={async () => {
+          setLoadingEspacios(true);
+          await addEspacio(campusSeleccionado.idcampus, formEspacio);
+          // Recargar espacios después de agregar uno nuevo
+          fetch(`/api/espacios?campus_id=${campusSeleccionado.idcampus}`)
+            .then(res => res.json())
+            .then(data => setEspacios(data))
+            .finally(() => setLoadingEspacios(false));
           setFormEspacio({ nombre: "", imagen: "", aforo: "" });
           setModalEspacio(false);
         }}

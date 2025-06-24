@@ -13,6 +13,7 @@ import {
   InputAdornment,
   Alert,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -23,16 +24,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
+    setError('');
     const res = await signIn("credentials", {
       redirect: false,
       email,
       password,
     });
+    setLoading(false);
 
     if (res.ok) {
       router.push("/dashboard");
@@ -157,6 +161,7 @@ export default function LoginPage() {
             color="primary"
             fullWidth
             size="large"
+            disabled={loading}
             sx={{
               mt: 2,
               borderRadius: 2,
@@ -166,8 +171,9 @@ export default function LoginPage() {
               letterSpacing: 1,
               fontSize: "1.1rem",
             }}
+            startIcon={loading ? <CircularProgress size={22} color="inherit" /> : null}
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
         </Box>
         <Typography
