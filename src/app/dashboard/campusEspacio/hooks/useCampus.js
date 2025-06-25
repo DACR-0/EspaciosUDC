@@ -14,6 +14,7 @@ export default function useCampus() {
 
   // Crear campus
   const addCampus = async (nuevo) => {
+    // nuevo.imagen debe ser el nombre único generado por el backend
     const res = await fetch("/api/campus", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,7 +23,7 @@ export default function useCampus() {
     const creado = await res.json();
     setCampus(prev => [...prev, { ...creado, espacios: [] }]);
   };
-
+  
   // Editar campus
   const editCampus = async (editado) => {
     await fetch("/api/campus", {
@@ -51,14 +52,14 @@ export default function useCampus() {
       alert("No se ha seleccionado un campus.");
       return;
     }
-    // Asegúrate de que capacidad sea un número o null
+    // espacio.imagen debe ser el nombre único generado por el backend
     const capacidad = espacio.aforo ? parseInt(espacio.aforo, 10) : null;
     const res = await fetch("/api/espacios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nombre: espacio.nombre,
-        imagen: espacio.imagen,
+        imagen: espacio.imagen, // nombre único
         capacidad,
         campus_id: campusId,
       }),
@@ -80,7 +81,6 @@ export default function useCampus() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: espacioId }),
     });
-    // Opcional: actualizar el estado local si lo necesitas
     setCampus(prev =>
       prev.map(c => ({
         ...c,

@@ -9,6 +9,7 @@ const opcionesDocumento = [
   { value: "TI", label: "Tarjeta de identidad" },
   { value: "CE", label: "Cédula de extranjería" },
   { value: "PS", label: "Pasaporte" },
+  { value: "Otro", label: "Otro" },
   // Puedes agregar más tipos si lo necesitas
 ];
 

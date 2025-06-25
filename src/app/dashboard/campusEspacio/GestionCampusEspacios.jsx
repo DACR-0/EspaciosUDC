@@ -59,13 +59,13 @@ export default function GestionCampusEspacios() {
         <CampusList
           campusList={campus}
           onSelectCampus={setCampusSeleccionado}
-          onDeleteCampus={deleteCampus} // <-- Aquí pasas la función de eliminar campus
+          onDeleteCampus={deleteCampus}
         />
         <CampusFormModal
           open={modalCampus}
           onClose={() => setModalCampus(false)}
-          onSubmit={() => {
-            addCampus(formCampus);
+          onSubmit={nuevoCampus => {
+            addCampus(nuevoCampus);
             setFormCampus({ nombre: "", imagen: "" });
             setModalCampus(false);
           }}
@@ -106,9 +106,9 @@ export default function GestionCampusEspacios() {
       <EspacioFormModal
         open={modalEspacio}
         onClose={() => setModalEspacio(false)}
-        onSubmit={async () => {
+        onSubmit={async nuevoEspacio => {
           setLoadingEspacios(true);
-          await addEspacio(campusSeleccionado.idcampus, formEspacio);
+          await addEspacio(campusSeleccionado.idcampus, nuevoEspacio); // Usa el argumento recibido
           // Recargar espacios después de agregar uno nuevo
           fetch(`/api/espacios?campus_id=${campusSeleccionado.idcampus}`)
             .then(res => res.json())

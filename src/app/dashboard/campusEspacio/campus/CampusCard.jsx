@@ -35,7 +35,7 @@ export default function CampusCard({ campus, onClick, onDelete }) {
       </IconButton>
       <CardMedia
         component="img"
-        image={campus.imagen}
+        image={campus.imagen ? `/uploads/campus/${campus.imagen}` : "/campus-default.jpg"}
         alt={campus.nombre}
         sx={{
           height: 110,

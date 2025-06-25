@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import PreguntaAbierta from "./preguntas/PreguntaAbierta";
 import PreguntaOpcionMultiple from "./preguntas/PreguntaOpcionMultiple";
 import PreguntaOpcionUnica from "./preguntas/PreguntaOpcionUnica";
@@ -27,11 +27,17 @@ const asistentesOpciones = [
   { value: "mas_250", label: "Más de 250" },
 ];
 
-export default function AlquilerSurvey({ form, onChange }: {
+// Usamos forwardRef para exponer la función de validación al padre
+const AlquilerSurvey = forwardRef(function AlquilerSurvey({ form, onChange }: {
   form: any;
   onChange: (field: string, value: any) => void;
-}) {
+}, ref) {
   const [convenioFile, setConvenioFile] = useState<File | null>(null);
+  const [subiendoArchivo, setSubiendoArchivo] = useState(false);
+
+  // Estados para archivo adicional (pregunta 9)
+  const [archivoAdicionalFile, setArchivoAdicionalFile] = useState<File | null>(null);
+  const [subiendoArchivoAdicional, setSubiendoArchivoAdicional] = useState(false);
 
   // Campus y espacios desde la base de datos
   const [campusList, setCampusList] = useState<{ value: string, src: string, label: string }[]>([]);
@@ -56,6 +62,59 @@ export default function AlquilerSurvey({ form, onChange }: {
       .finally(() => setLoadingCampus(false));
   }, []);
 
+  // función para subir el archivo de convenio (pregunta 4)
+  const handleConvenioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setConvenioFile(file);
+
+    if (file && form.convenio === "si") {
+      setSubiendoArchivo(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("/api/upload-convenio", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.fileName) {
+          onChange("convenioArchivo", data.fileName);
+        }
+      } finally {
+        setSubiendoArchivo(false);
+      }
+    } else {
+      onChange("convenioArchivo", null);
+    }
+  };
+
+  // función para subir el archivo adicional (pregunta 9)
+  const handleArchivoAdicionalFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0] || null;
+  setArchivoAdicionalFile(file);
+
+  if (file && form.archivoAdicional === "si") {
+    setSubiendoArchivoAdicional(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload-convenio", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.fileName) {
+        onChange("archivoAdicionalFile", data.fileName);
+      }
+    } finally {
+      setSubiendoArchivoAdicional(false);
+    }
+  } else {
+    onChange("archivoAdicionalFile", null);
+  }
+};
   // Cargar espacios cuando se selecciona un campus
   useEffect(() => {
     if (form.campus) {
@@ -77,13 +136,37 @@ export default function AlquilerSurvey({ form, onChange }: {
     }
   }, [form.campus]);
 
+  // --- VALIDACIÓN DE FORMULARIO ---
+  function validarFormulario() {
+    // Ajusta los nombres de los campos según tu estructura real
+    return (
+      !!form.detalleActividad &&
+      Array.isArray(form.publico) && form.publico.length > 0 &&
+      !!form.menores &&
+      !!form.convenio &&
+      !!form.campus &&
+      !!form.espacio &&
+      !!form.fechaHora &&
+      !!form.fechaHora.fechaInicio &&
+      !!form.fechaHora.fechaFin &&
+      !!form.fechaHora.horaInicio &&
+      !!form.fechaHora.horaFin &&
+      !!form.asistentes
+      // archivo adicional es opcional
+    );
+  }
+
+  // Exponer la función de validación al padre
+  useImperativeHandle(ref, () => ({
+    validarFormulario
+  }));
+
   return (
     <>
       <PreguntaAbierta
         label="1. Detalle de la actividad a realizar"
         value={form.detalleActividad || ""}
         onChange={val => onChange("detalleActividad", val)}
-        required
       />
 
       <PreguntaOpcionMultiple
@@ -98,19 +181,21 @@ export default function AlquilerSurvey({ form, onChange }: {
         options={menoresOpciones}
         value={form.menores || ""}
         onChange={val => onChange("menores", val)}
-        required
       />
 
       <PreguntaSiNoArchivo
         label="4. ¿La actividad a realizar se llevará a cabo en cumplimiento de obligaciones en el marco de un Convenio o Contrato Inter-administrativo? (Si marca Si, favor anexar copia del convenio o contrato)"
         value={form.convenio || ""}
-        onChange={val => onChange("convenio", val)}
-        file={convenioFile}
-        onFileChange={e => {
-          const file = e.target.files?.[0] || null;
-          setConvenioFile(file);
-          onChange("convenioArchivo", file);
+        onChange={val => {
+          onChange("convenio", val);
+          if (val === "no") {
+            onChange("convenioArchivo", null);
+            setConvenioFile(null);
+          }
         }}
+        file={convenioFile}
+        onFileChange={handleConvenioFileChange}
+        loading={subiendoArchivo}
       />
 
       <PreguntaCampusEspacio
@@ -140,16 +225,24 @@ export default function AlquilerSurvey({ form, onChange }: {
         options={asistentesOpciones}
         value={form.asistentes || ""}
         onChange={val => onChange("asistentes", val)}
-        required
       />
 
       <PreguntaSiNoArchivo
         label="9. ¿Deseas anexar un archivo adicional? (carta de solicitud, orden o permiso)"
         value={form.archivoAdicional || ""}
-        onChange={val => onChange("archivoAdicional", val)}
-        file={form.archivoAdicionalFile}
-        onFileChange={e => onChange("archivoAdicionalFile", e.target.files?.[0] || null)}
+        onChange={val => {
+          onChange("archivoAdicional", val);
+          if (val === "no") {
+            onChange("archivoAdicionalFile", null);
+            setArchivoAdicionalFile(null);
+          }
+        }}
+        file={archivoAdicionalFile}
+        onFileChange={handleArchivoAdicionalFileChange}
+        loading={subiendoArchivoAdicional}
       />
     </>
   );
-}
+});
+
+export default AlquilerSurvey;

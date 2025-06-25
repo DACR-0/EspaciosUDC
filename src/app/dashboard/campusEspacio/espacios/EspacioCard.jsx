@@ -31,7 +31,7 @@ export default function EspacioCard({ espacio, onDelete }) {
       </IconButton>
       <CardMedia
         component="img"
-        image={espacio.imagen}
+        image={espacio.imagen ? `/uploads/campus/${espacio.imagen}` : "/espacio-default.jpg"}
         alt={espacio.nombre}
         sx={{
           height: 110,

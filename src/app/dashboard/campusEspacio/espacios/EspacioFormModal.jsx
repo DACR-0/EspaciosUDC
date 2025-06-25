@@ -1,6 +1,40 @@
+import { useState } from "react";
 import { Modal, Box, Typography, TextField, Stack, Button } from "@mui/material";
 
 export default function EspacioFormModal({ open, onClose, onSubmit, form, setForm }) {
+  const [imagenFile, setImagenFile] = useState(null);
+  const [subiendo, setSubiendo] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setImagenFile(file);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.nombre || !imagenFile || !form.aforo) return;
+    setSubiendo(true);
+
+    const formData = new FormData();
+    formData.append("file", imagenFile);
+
+    try {
+      // Usar el mismo endpoint de campus para subir la imagen
+      const res = await fetch("/api/upload-campus", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.fileName) {
+        onSubmit({ ...form, imagen: data.fileName });
+        setImagenFile(null);
+      }
+    } catch (err) {
+      // Maneja el error si lo deseas
+    } finally {
+      setSubiendo(false);
+    }
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <Box
@@ -24,14 +58,26 @@ export default function EspacioFormModal({ open, onClose, onSubmit, form, setFor
           value={form.nombre}
           onChange={e => setForm({ ...form, nombre: e.target.value })}
         />
-        <TextField
-          label="URL de imagen"
-          fullWidth
-          margin="normal"
-          value={form.imagen}
-          onChange={e => setForm({ ...form, imagen: e.target.value })}
-          placeholder="https://..."
-        />
+        <Button
+          variant={imagenFile ? "contained" : "outlined"}
+          component="label"
+          sx={{ mt: 2, mb: 1 }}
+          disabled={subiendo}
+        >
+          {imagenFile ? "Imagen seleccionada" : "Subir imagen"}
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleFileChange}
+            disabled={subiendo}
+          />
+        </Button>
+        {imagenFile && (
+          <Typography variant="body2" color="text.secondary">
+            {imagenFile.name}
+          </Typography>
+        )}
         <TextField
           label="Aforo máximo"
           fullWidth
@@ -41,13 +87,13 @@ export default function EspacioFormModal({ open, onClose, onSubmit, form, setFor
           onChange={e => setForm({ ...form, aforo: e.target.value })}
         />
         <Stack direction="row" spacing={2} mt={2} justifyContent="flex-end">
-          <Button onClick={onClose}>Cancelar</Button>
+          <Button onClick={onClose} disabled={subiendo}>Cancelar</Button>
           <Button
             variant="contained"
-            onClick={onSubmit}
-            disabled={!form.nombre || !form.imagen || !form.aforo}
+            onClick={handleSubmit}
+            disabled={!form.nombre || !imagenFile || !form.aforo || subiendo}
           >
-            Agregar
+            {subiendo ? "Subiendo..." : "Agregar"}
           </Button>
         </Stack>
       </Box>

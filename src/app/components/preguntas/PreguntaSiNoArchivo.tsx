@@ -1,5 +1,5 @@
 // components/preguntas/PreguntaSiNoArchivo.tsx
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, Typography, Box } from "@mui/material";
+import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Button, Typography, Box, CircularProgress } from "@mui/material";
 
 interface PreguntaSiNoArchivoProps {
   label: string;
@@ -7,6 +7,7 @@ interface PreguntaSiNoArchivoProps {
   onChange: (value: string) => void;
   file?: File | null;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  loading?: boolean; // <-- Agregado
 }
 
 export default function PreguntaSiNoArchivo({
@@ -15,6 +16,7 @@ export default function PreguntaSiNoArchivo({
   onChange,
   file,
   onFileChange,
+  loading = false, // <-- Valor por defecto
 }: PreguntaSiNoArchivoProps) {
   return (
     <FormControl component="fieldset" margin="normal">
@@ -29,11 +31,14 @@ export default function PreguntaSiNoArchivo({
             variant={file ? "contained" : "outlined"}
             color={file ? "success" : "primary"}
             component="label"
+            disabled={loading}
           >
-            {file ? "Archivo seleccionado" : "Subir archivo"}
-            <input type="file" hidden onChange={onFileChange} />
+            {loading
+              ? <CircularProgress size={20} color="inherit" />
+              : (file ? "Archivo seleccionado" : "Subir archivo")}
+            <input type="file" hidden onChange={onFileChange} disabled={loading} />
           </Button>
-          {file && (
+          {file && !loading && (
             <Typography variant="body2" color="success.main">
               {file.name}
             </Typography>
