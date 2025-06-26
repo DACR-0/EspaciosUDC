@@ -2,7 +2,7 @@ import { pool } from "@/app/utils/db";
 
 export async function POST(request) {
   const data = await request.json();
-  // console.log("Datos recibidos:", data);
+  console.log("Datos recibidos:", data);
 
   // 1. Insertar en solicitante
   let idSolicitante = null;

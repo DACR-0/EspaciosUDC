@@ -1,12 +1,48 @@
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  IconButton,
+} from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useEffect, useState, useCallback } from "react";
+import ModalDetalleReserva from "./ModalDetalleReserva";
 
 export default function ReservasEspacios() {
-  // Datos simulados de reservas
-  const reservas = [
-    { id: 1, solicitante: "Juan Pérez", espacio: "Auditorio", fecha: "2024-07-10", estado: "Aprobada" },
-    { id: 2, solicitante: "Ana Gómez", espacio: "Sala de reuniones", fecha: "2024-07-12", estado: "Pendiente" },
-    { id: 3, solicitante: "Carlos Ruiz", espacio: "Cancha múltiple", fecha: "2024-07-15", estado: "Rechazada" },
-  ];
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [reservaSeleccionada, setReservaSeleccionada] = useState(null);
+
+  // Función para cargar reservas (puede ser reutilizada)
+  const cargarReservas = useCallback(() => {
+    setLoading(true);
+    fetch("/api/reservas")
+      .then(res => res.json())
+      .then(data => {
+        setReservas(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    cargarReservas();
+  }, [cargarReservas]);
+
+  // Función para cerrar el modal y recargar reservas
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setReservaSeleccionada(null);
+    cargarReservas();
+  };
 
   return (
     <Box>
@@ -24,23 +60,60 @@ export default function ReservasEspacios() {
           <TableHead>
             <TableRow>
               <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Solicitante</TableCell>
+              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Documento</TableCell>
+              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Fecha Solicitud</TableCell>
+              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Campus</TableCell>
               <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Espacio</TableCell>
-              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Fecha</TableCell>
+              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Tipo</TableCell>
               <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Estado</TableCell>
+              <TableCell sx={{ color: "text.primary", fontWeight: 600 }}>Ver</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {reservas.map((reserva) => (
-              <TableRow key={reserva.id}>
-                <TableCell sx={{ color: "text.primary" }}>{reserva.solicitante}</TableCell>
-                <TableCell sx={{ color: "text.primary" }}>{reserva.espacio}</TableCell>
-                <TableCell sx={{ color: "text.primary" }}>{reserva.fecha}</TableCell>
-                <TableCell sx={{ color: "text.primary" }}>{reserva.estado}</TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  <CircularProgress size={32} />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : reservas.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  No hay reservas registradas.
+                </TableCell>
+              </TableRow>
+            ) : (
+              reservas.map((reserva, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{reserva.solicitante}</TableCell>
+                  <TableCell>{reserva.documento}</TableCell>
+                  <TableCell>{reserva.fecha_solicitud}</TableCell>
+                  <TableCell>{reserva.campus}</TableCell>
+                  <TableCell>{reserva.espacio}</TableCell>
+                  <TableCell>{reserva.tipo_solicitud}</TableCell>
+                  <TableCell>{reserva.estado}</TableCell>
+                  <TableCell>
+                    <IconButton
+                      color="primary"
+                      onClick={() => {
+                        setReservaSeleccionada(reserva);
+                        setModalOpen(true);
+                      }}
+                    >
+                      <VisibilityIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+      <ModalDetalleReserva
+        open={modalOpen}
+        onClose={handleCloseModal}
+        reserva={reservaSeleccionada}
+      />
     </Box>
   );
 }

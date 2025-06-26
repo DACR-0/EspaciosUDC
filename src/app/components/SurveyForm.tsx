@@ -9,14 +9,12 @@ import {
   Paper,
   InputLabel,
   FormControl,
-  CircularProgress,
   Alert,
   Divider,
 } from "@mui/material";
 import { IconClipboardList } from "@tabler/icons-react";
 import type { SelectChangeEvent } from "@mui/material";
 import AlquilerSurvey from "./AlquilerSurvey";
-import PrestamoSurvey from "./PrestamoSurvey";
 import DatosPersonalesAlquiler from "./DatosPersonalesAlquiler";
 import DatosPersonalesPrestamo from "./DatosPersonalesPrestamo";
 
@@ -39,11 +37,6 @@ export default function SurveyForm() {
   const handleChangeInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const name = e.target.name as keyof FormState;
-    setForm({ ...form, [name]: e.target.value });
-  };
-
-  const handleChangeSelect = (e: SelectChangeEvent) => {
     const name = e.target.name as keyof FormState;
     setForm({ ...form, [name]: e.target.value });
   };
@@ -146,17 +139,10 @@ export default function SurveyForm() {
             </Select>
           </FormControl>
 
-          {tipo === "alquiler" && (
+          {tipo && (
             <AlquilerSurvey
               form={form}
               onChange={(field, value) => setForm(prev => ({ ...prev, [field]: value }))}
-            />
-          )}
-
-          {tipo === "prestamo" && (
-            <PrestamoSurvey
-              form={form}
-              onInputChange={handleChangeInput}
             />
           )}
 
@@ -184,9 +170,26 @@ export default function SurveyForm() {
 
       {/* Paso 3: Mensaje final */}
       {paso === 3 && (
-        <Alert severity="success" sx={{ mt: 3 }}>
-          ¡Encuesta enviada correctamente!
-        </Alert>
+        <>
+          <Alert severity="success" sx={{ mt: 3, mb: 2 }}>
+            ¡Encuesta enviada correctamente!
+          </Alert>
+          <Box display="flex" justifyContent="center" gap={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setForm({});
+                setDatosEspacio(null);
+                setTipo("");
+                setPaso(1);
+                setMensaje("");
+              }}
+            >
+              Hacer otra encuesta
+            </Button>
+          </Box>
+        </>
       )}
 
       {/* Mensaje de error */}
