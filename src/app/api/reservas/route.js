@@ -4,9 +4,10 @@ export async function GET() {
   try {
     const [rows] = await pool.query(`
       SELECT 
+        reserva.idreserva as numero_reserva,
         solicitante.nombre AS solicitante,
         solicitante.documento_indentidad AS documento,
-        reserva.registro_solicitud AS fecha_solicitud,
+        DATE_FORMAT(reserva.registro_solicitud, '%Y-%m-%d %H:%i:%s') AS fecha_solicitud,
         campus.nombre AS campus,
         espacio.nombre AS espacio,
         reserva.tipo_solicitud,

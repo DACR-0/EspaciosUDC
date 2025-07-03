@@ -1,16 +1,28 @@
-import { Box, Typography, Grid, Paper } from "@mui/material";
+import { Box, Typography, Grid, Paper, CircularProgress } from "@mui/material";
+import { useEffect, useState } from "react";
+import CalendarioReservas from "./CalendarioReservas"; // Asegúrate de que la ruta sea correcta
 
 export default function DashboardMetricas() {
-  // Ejemplo de métricas simuladas
-  const metricas = [
-    { label: "Solicitudes totales", valor: 120 },
-    { label: "Solicitudes aprobadas", valor: 85 },
-    { label: "Solicitudes rechazadas", valor: 20 },
-    { label: "Pendientes por revisar", valor: 15 },
-  ];
+  const [metricas, setMetricas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/metricas")
+      .then(res => res.json())
+      .then(data => {
+        setMetricas(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
+
+    // en esta parte va el calendario
     <Box>
+      <Box mb={4}>
+        <CalendarioReservas />
+      </Box>
       <Typography
         variant="h5"
         fontWeight={700}
@@ -18,41 +30,73 @@ export default function DashboardMetricas() {
         color="text.primary"
         sx={{ letterSpacing: 0.5 }}
       >
-        Dashboard de Métricas
+        Métricas
       </Typography>
-      <Grid container spacing={3}>
-        {metricas.map((metrica, idx) => (
-          <Grid item xs={12} sm={6} md={3} key={idx}>
-            <Paper
-              elevation={4}
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight={160}>
+          <CircularProgress />
+        </Box>
+      ) : (
+
+        <Grid container spacing={3} alignItems="stretch">
+          {metricas.map((metrica, idx) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={3}
+              key={idx}
               sx={{
-                p: 3,
-                textAlign: "center",
-                bgcolor: "#fff",
-                color: "text.primary",
+                display: "flex",
+                alignItems: "stretch",
               }}
             >
-              <Typography
-                variant="h6"
-                color="primary"
-                fontWeight={600}
-                gutterBottom
-                sx={{ color: "primary.main" }}
+              <Paper
+                elevation={4}
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  bgcolor: "#fff",
+                  color: "text.primary",
+                  height: 160,
+                  minWidth: 0,
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                {metrica.label}
-              </Typography>
-              <Typography
-                variant="h4"
-                fontWeight={700}
-                color="text.primary"
-                sx={{ color: "text.primary" }}
-              >
-                {metrica.valor}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+                <Typography
+                  variant="h6"
+                  color="primary"
+                  fontWeight={600}
+                  gutterBottom
+                  sx={{
+                    color: "primary.main",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    width: "100%",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {metrica.label}
+                </Typography>
+                <Typography
+                  variant="h4"
+                  fontWeight={700}
+                  color="text.primary"
+                  sx={{ color: "text.primary" }}
+                >
+                  {metrica.valor}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+
+      )}
     </Box>
   );
 }

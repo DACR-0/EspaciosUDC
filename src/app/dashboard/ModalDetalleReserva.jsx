@@ -117,7 +117,19 @@ export default function ModalDetalleReserva({ open, onClose, reserva, onAprobar,
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography>
-                <b>{labelsFormulario.p4_convenio}:</b> {formulario.p4_convenio}
+                <b>{labelsFormulario.p4_convenio}:</b>{" "}
+                {formulario.p4_convenio
+                  ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      href={`/uploads/convenios/${formulario.p4_convenio}`}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Ver archivo
+                    </Button>
+                  ) : "NO"}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -147,13 +159,33 @@ export default function ModalDetalleReserva({ open, onClose, reserva, onAprobar,
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography>
-                <b>{labelsFormulario.p9_anexo}:</b> {formulario.p9_anexo}
+                <b>{labelsFormulario.p9_anexo}:</b>{" "}
+                {formulario.p9_anexo
+                  ? (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      href={`/uploads/convenios/${formulario.p9_anexo}`}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Ver archivo
+                    </Button>
+                  ) : "NO"}
               </Typography>
             </Grid>
           </Grid>
         </Box>
       </DialogContent>
       <DialogActions>
+        <Button
+          onClick={onClose}
+          color="inherit"
+          variant="text"
+          disabled={actualizando}
+        >
+          Cerrar
+        </Button>
         <Button
           color="error"
           variant="outlined"
