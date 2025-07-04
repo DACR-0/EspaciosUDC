@@ -45,6 +45,7 @@ export async function POST(request) {
 
     return Response.json({ id: result.insertId, success: true });
   } catch (error) {
+    console.error(error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

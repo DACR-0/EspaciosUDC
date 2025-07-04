@@ -23,6 +23,7 @@ export async function POST(request) {
     );
     idSolicitante = solicitanteResult.insertId;
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error al guardar solicitante" }), { status: 500 });
   }
 
@@ -54,6 +55,7 @@ export async function POST(request) {
     );
     idFormAlquiler = formResult.insertId;
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error al guardar formulario de alquiler" }), { status: 500 });
   }
 
@@ -70,6 +72,7 @@ export async function POST(request) {
       ]
     );
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error al guardar reserva" }), { status: 500 });
   }
 

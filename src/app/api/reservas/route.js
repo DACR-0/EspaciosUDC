@@ -25,6 +25,7 @@ export async function GET() {
     `);
     return Response.json(rows);
   } catch (error) {
+    console.error(error);
     return Response.json({ error: "Error al obtener reservas" }, { status: 500 });
   }
 }

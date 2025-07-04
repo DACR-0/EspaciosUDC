@@ -45,6 +45,7 @@ WHERE idform_alquiler = ?
       formulario: formularioRows[0] || null,
     });
   } catch (error) {
+    console.error(error);
     return Response.json({ error: "Error al obtener detalles" }, { status: 500 });
   }
 }

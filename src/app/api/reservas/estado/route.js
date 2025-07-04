@@ -12,6 +12,7 @@ export async function POST(request) {
     );
     return Response.json({ success: true });
   } catch (error) {
+    console.error(error);
     return Response.json({ error: "Error al actualizar estado" }, { status: 500 });
   }
 }

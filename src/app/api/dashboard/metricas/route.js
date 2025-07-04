@@ -20,6 +20,7 @@ export async function GET() {
 
     return new Response(JSON.stringify(metricas), { status: 200 });
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error al obtener métricas" }), { status: 500 });
   }
 }

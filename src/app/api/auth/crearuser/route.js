@@ -35,6 +35,7 @@ export async function POST(req) {
 
     return Response.json({ ok: true, mensaje: "Usuario creado correctamente" });
   } catch (error) {
-    return Response.json({ error: "Error al crear usuario" }, { status: 500 });
-  }
+  console.error(error);
+  return Response.json({ error: "Error al crear usuario" }, { status: 500 });
+}
 }

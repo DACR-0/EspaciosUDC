@@ -1,7 +1,7 @@
 "use client";
 
 import SurveyForm from "./components/SurveyForm";
-import { Button, Box, Typography, AppBar, Toolbar, Container } from "@mui/material";
+import { Button, Box, AppBar, Toolbar, Container } from "@mui/material";
 import { IconLogin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 
